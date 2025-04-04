@@ -3,6 +3,7 @@ import curses
 import random
 import time
 from collections.abc import Sequence
+from enum import Enum
 from typing import Optional
 
 from matrix_rain_characters import MatrixRainCharacters
@@ -97,9 +98,6 @@ def setup_screen(
         VALID_COLORS[args_color],
         VALID_COLORS[args_background],
     )
-
-
-from enum import Enum
 
 
 class Action(Enum):
