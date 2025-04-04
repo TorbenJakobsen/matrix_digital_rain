@@ -13,6 +13,7 @@ venv/bin/activate:
 	python3.11 -m venv venv
 	. ./venv/bin/activate
 	$(PYTHON) -m pip install --upgrade pip setuptools
+	$(PYTHON) -m pip install -r requirements.txt
 	$(PYTHON) -m pip install -r requirements_test.txt
 	$(PYTHON) -m pip install -r requirements_dev.txt
 

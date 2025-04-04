@@ -254,6 +254,7 @@ def main_loop(
 
             if active_trail.is_exhausted():
                 # Flag as exhausted for later processing when leaving loop
+                # Just removing from `active_trails_list` messes up loop
                 exhausted_trails_list.append(active_trail)
                 continue
 

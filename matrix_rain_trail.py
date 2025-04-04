@@ -72,7 +72,6 @@ class MatrixRainTrail:
         # `randint` includes endpoints
 
         self._head_position = -1
-        self.started = False
 
     def __len__(self: Self) -> int:
         return self._length

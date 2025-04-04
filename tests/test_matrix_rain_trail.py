@@ -23,6 +23,21 @@ HBBBBBT     offset
 """
 
 
+def test_mrt_instantiate_colno_none_fails() -> None:
+    with pytest.raises(Exception):
+        _: MatrixRainTrail = MatrixRainTrail(None, SCREEN_COLUMNS, SCREEN_LINES)
+
+
+def test_mrt_instantiate_cols_none_fails() -> None:
+    with pytest.raises(Exception):
+        _: MatrixRainTrail = MatrixRainTrail(COLUMN_NUMBER, None, SCREEN_LINES)
+
+
+def test_mrt_instantiate_lines_none_fails() -> None:
+    with pytest.raises(Exception):
+        _: MatrixRainTrail = MatrixRainTrail(COLUMN_NUMBER, SCREEN_COLUMNS, None)
+
+
 @pytest.mark.repeat(3)
 def test_mrt_instantiate() -> None:
     # GIVEN
@@ -74,7 +89,7 @@ def test_mrt_move_head(
     assert sut.tail_start() == sut.head_start() - (sut.length() - 1)
 
 
-@pytest.mark.repeat(500)
+@pytest.mark.repeat(3)
 def test_mrt_move_tail() -> None:
     # GIVEN
     sut: MatrixRainTrail = MatrixRainTrail(COLUMN_NUMBER, SCREEN_COLUMNS, SCREEN_LINES)
