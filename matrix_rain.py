@@ -155,6 +155,9 @@ def pop_random_from_list(available: list[int]) -> int:
 
     e.g. `[0,1,2,3,4]` -> `[0,1,2,4]` and returns `3`
     """
+    if not available or len(available) == 0:
+        raise ValueError("argument list has no elements to pop")
+
     chosen: int = available.pop(random.randrange(len(available)))
     return chosen
 
