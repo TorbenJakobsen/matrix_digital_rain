@@ -185,6 +185,9 @@ def main_loop(
 
     exhausted_trails_list: list[MatrixRainTrail] = []
 
+    TO_ACTIVATE = 2
+    MIN_AVAILABLE_COLUMNS = 0  # Leave some columns without trails
+
     while True:
 
         #
@@ -210,9 +213,6 @@ def main_loop(
         #
         # If available columns are not all used -> create new trails
         #
-
-        TO_ACTIVATE = 2
-        MIN_AVAILABLE_COLUMNS = 0  # Leave some columns without trails
 
         for _ in range(TO_ACTIVATE):
             # Keep minimum available columns also after activation
