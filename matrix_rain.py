@@ -1,13 +1,13 @@
 import argparse
 import curses
 import random
-import time
 from collections.abc import Sequence
 from enum import Enum
-from typing import Literal, NoReturn, Optional
+from typing import Literal, Optional
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
+from matrix_sleep_timer import MatrixSleepTimer
 
 # Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
 # Color pair 0 is hard-wired to white on black, and cannot be changed.
@@ -41,8 +41,8 @@ The colors are the default initial `curses` colors.
 MIN_SCREEN_SIZE_Y = 8
 MIN_SCREEN_SIZE_X = 8
 
-DELAY_SPEED_SEC: float = 0.1
-"""Determines sleep interval in seconds to regulate rain trail descent on screen."""
+sleep_timer: MatrixSleepTimer = MatrixSleepTimer(0.1, 1.6)
+"""Determines sleep interval to regulate rain trail descent on screen."""
 
 
 class MatrixRainException(Exception):
@@ -199,8 +199,6 @@ def main_loop(
 
     # ---
 
-    delay_speed_sec: float = DELAY_SPEED_SEC
-
     char_itr: MatrixRainCharacters = MatrixRainCharacters()
 
     active_trails_list: list[MatrixRainTrail] = []
@@ -222,13 +220,13 @@ def main_loop(
         # Handle screen resize
         #
 
-        is_screen_resized, screen_max_y, screen_max_x = validate_screen_size(
+        screen_is_resized, screen_max_y, screen_max_x = validate_screen_size(
             screen,
             screen_max_y,
             screen_max_x,
         )
 
-        if is_screen_resized:
+        if screen_is_resized:
             # Free up all the columns - no activated columns
             available_column_numbers = list(range(screen_max_x))
             active_trails_list.clear()
@@ -300,7 +298,7 @@ def main_loop(
         # ---
 
         screen.refresh()
-        time.sleep(delay_speed_sec)
+        sleep_timer.sleep()
 
         #
         # Remove exhausted from active trails and make column available
@@ -319,12 +317,11 @@ def main_loop(
 
         action = handle_key_presses(screen)
         if action is Action.KEY_UP:
-            # decrease sleep delay
-            delay_speed_sec = delay_speed_sec / 1.6
+            sleep_timer.decrement_sleep()
             continue
         if action is Action.KEY_DOWN:
             # increase sleep delay
-            delay_speed_sec = delay_speed_sec * 1.6
+            sleep_timer.increment_sleep()
             continue
         if action is Action.BREAK:
             break
