@@ -60,7 +60,6 @@ def at_lower_right_corner(line, col) -> bool:
     """
     `True` if position is at the bottom right corner of screen; otherwise `False`.
     """
-    # return (line, col) == (curses.LINES - 1, curses.COLS - 1)
     return (line, col) == (screen_max_y - 1, screen_max_x - 1)
 
 
