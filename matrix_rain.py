@@ -51,10 +51,7 @@ class MatrixRainException(Exception):
 
 def at_lower_right_corner(line, col) -> bool:
     """
-    `True` if position is at the lower right corner; otherwise `False`.
-
-    Writing to the lower right corner will raise an Exception
-    as the resulting move of cursor position will move out of bounds (next line).
+    `True` if position is at the bottom right corner of screen; otherwise `False`.
     """
     return (line, col) == (curses.LINES - 1, curses.COLS - 1)
 
@@ -258,7 +255,11 @@ def main_loop(
 
             # activate trail by chosen number
             active_trails_list.append(
-                MatrixRainTrail(chosen_column_number, screen_max_x, screen_max_y)
+                MatrixRainTrail(
+                    chosen_column_number,
+                    screen_max_x,
+                    screen_max_y,
+                )
             )
 
         # ---
