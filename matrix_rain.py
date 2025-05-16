@@ -148,6 +148,16 @@ def handle_key_presses(screen: curses.window) -> Action:
     return Action.NONE
 
 
+def pop_random_from_list(available: list[int]) -> int:
+    """
+    Chooses a random index, remove value from list and returns chosen value
+
+    e.g. [0,1,2,3,4] -> [0,1,2,4] and returns 3
+    """
+    chosen: int = available.pop(random.randrange(len(available)))
+    return chosen
+
+
 def main_loop(
     screen: curses.window,
     args: argparse.Namespace,
@@ -188,39 +198,33 @@ def main_loop(
             if screen_max_x < MIN_SCREEN_SIZE_X:
                 raise MatrixRainException("Error: screen width is too narrow.")
 
+            # Free up all the columns - no activated columns
             available_column_numbers = list(range(screen_max_x))
             active_trails_list.clear()
 
             screen.clear()
             screen.refresh()
-            # -> continue loop
+            # -> continue loop from start
             continue
 
         #
         # If available columns are not all used -> create new trails
         #
 
-        TO_ACTIVATE = 1
-        MIN_AVAILABLE_COLUMNS = (
-            0  # 8 + TO_ACTIVATE  # Leave some columns without trails
-        )
+        TO_ACTIVATE = 2
+        MIN_AVAILABLE_COLUMNS = 0  # Leave some columns without trails
 
-        has_available_columns: bool = (
-            len(available_column_numbers) > MIN_AVAILABLE_COLUMNS
-        )
+        for _ in range(TO_ACTIVATE):
+            # Keep minimum available columns also after activation
+            if len(available_column_numbers) <= MIN_AVAILABLE_COLUMNS:
+                break
 
-        if has_available_columns:
-            for _ in range(TO_ACTIVATE):
-                # choose a column number and remove from available choices
-                # e.g [0,1,2,3,4] -> [0,1,2,4] and returns 3
-                chosen_column_number: int = available_column_numbers.pop(
-                    random.randrange(len(available_column_numbers))
-                )
+            chosen_column_number: int = pop_random_from_list(available_column_numbers)
 
-                # activate trail from chosen number
-                active_trails_list.append(
-                    MatrixRainTrail(chosen_column_number, screen_max_x, screen_max_y)
-                )
+            # activate trail by chosen number
+            active_trails_list.append(
+                MatrixRainTrail(chosen_column_number, screen_max_x, screen_max_y)
+            )
 
         # ---
 
