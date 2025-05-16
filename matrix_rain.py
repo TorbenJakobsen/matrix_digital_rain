@@ -5,6 +5,8 @@ from collections.abc import Sequence
 from enum import Enum
 from typing import Literal, Optional
 
+import _curses  # to be able to catch the proper exception
+
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
 from matrix_sleep_timer import MatrixSleepTimer
@@ -14,6 +16,11 @@ from matrix_sleep_timer import MatrixSleepTimer
 # Coordinates are always passed in the order y,x, and the top-left corner of a window is coordinate (0,0)
 # Writing lower right corner...
 # https://docs.python.org/3/howto/curses.html
+
+
+# Initial ("invalid" as too small) values -> will force a size recalculation later
+screen_max_x: int = 1  # columns
+screen_max_y: int = 1  # lines
 
 
 COLOR_PAIR_HEAD: int = 10
@@ -53,7 +60,8 @@ def at_lower_right_corner(line, col) -> bool:
     """
     `True` if position is at the bottom right corner of screen; otherwise `False`.
     """
-    return (line, col) == (curses.LINES - 1, curses.COLS - 1)
+    # return (line, col) == (curses.LINES - 1, curses.COLS - 1)
+    return (line, col) == (screen_max_y - 1, screen_max_x - 1)
 
 
 def head_at_lower_right_corner(trail: MatrixRainTrail) -> bool:
@@ -167,8 +175,8 @@ def pop_random_from_list(available: list[int]) -> int:
 
 def validate_screen_size(
     screen: curses.window,
-    screen_max_y: int,
-    screen_max_x: int,
+    max_y: int,
+    max_x: int,
 ) -> tuple[Literal[True], int, int] | tuple[Literal[False], int, int]:
     """Checks if screen is resized.
 
@@ -177,15 +185,15 @@ def validate_screen_size(
 
     Raises MatrixRainException if sizes are outside contraints.
     """
-    if curses.is_term_resized(screen_max_y, screen_max_x):
-        screen_max_y, screen_max_x = screen.getmaxyx()
-        if screen_max_y < MIN_SCREEN_SIZE_Y:
+    if curses.is_term_resized(max_y, max_x):
+        max_y, max_x = screen.getmaxyx()
+        if max_y < MIN_SCREEN_SIZE_Y:
             raise MatrixRainException("Error: screen height is too short.")
-        if screen_max_x < MIN_SCREEN_SIZE_X:
+        if max_x < MIN_SCREEN_SIZE_X:
             raise MatrixRainException("Error: screen width is too narrow.")
-        return True, screen_max_y, screen_max_x
+        return True, max_y, max_x
     # Not resized
-    return False, screen_max_y, screen_max_x
+    return False, max_y, max_x
 
 
 def main_loop(
@@ -196,6 +204,8 @@ def main_loop(
 
     Call is initiated by the curses setup in `main()`.
     """
+    global screen_max_y
+    global screen_max_x
 
     #
     # Read from parsed arguments
@@ -208,10 +218,6 @@ def main_loop(
     char_itr: MatrixRainCharacters = MatrixRainCharacters()
 
     active_trails_list: list[MatrixRainTrail] = []
-
-    # Initial ("invalid" as too small) values -> will force a size recalculation later
-    screen_max_x: int = 1  # columns
-    screen_max_y: int = 1  # lines
 
     available_column_numbers: list[int] = []
 
@@ -269,41 +275,46 @@ def main_loop(
         for active_trail in active_trails_list:
 
             # Modify the head and the tail (ignore body between)
+            try:
+                if not head_at_lower_right_corner(active_trail):
+                    if active_trail.is_head_visible():
+                        screen.addstr(
+                            active_trail.head_start(),
+                            active_trail.column_number,
+                            next(char_itr),
+                            curses.color_pair(COLOR_PAIR_TAIL),
+                        )
 
-            if not head_at_lower_right_corner(active_trail):
-                if active_trail.is_head_visible():
-                    screen.addstr(
-                        active_trail.head_start(),
-                        active_trail.column_number,
-                        next(char_itr),
-                        curses.color_pair(COLOR_PAIR_TAIL),
-                    )
+                if not tail_at_lower_right_corner(active_trail):
+                    if active_trail.is_tail_visible():
+                        screen.addstr(
+                            active_trail.tail_start(),
+                            active_trail.column_number,
+                            BLANK,
+                            curses.color_pair(COLOR_PAIR_TAIL),
+                        )
 
-            if not tail_at_lower_right_corner(active_trail):
-                if active_trail.is_tail_visible():
-                    screen.addstr(
-                        active_trail.tail_start(),
-                        active_trail.column_number,
-                        BLANK,
-                        curses.color_pair(COLOR_PAIR_TAIL),
-                    )
+                active_trail.move_forward()
 
-            active_trail.move_forward()
+                if active_trail.is_exhausted():
+                    # Flag as exhausted for later processing when leaving loop
+                    # Just removing from `active_trails_list` messes up loop
+                    exhausted_trails_list.append(active_trail)
+                    continue
 
-            if active_trail.is_exhausted():
-                # Flag as exhausted for later processing when leaving loop
-                # Just removing from `active_trails_list` messes up loop
-                exhausted_trails_list.append(active_trail)
-                continue
-
-            if not head_at_lower_right_corner(active_trail):
-                if active_trail.is_head_visible():
-                    screen.addstr(
-                        active_trail.head_start(),
-                        active_trail.column_number,
-                        next(char_itr),
-                        curses.color_pair(COLOR_PAIR_HEAD),
-                    )
+                if not head_at_lower_right_corner(active_trail):
+                    if active_trail.is_head_visible():
+                        screen.addstr(
+                            active_trail.head_start(),
+                            active_trail.column_number,
+                            next(char_itr),
+                            curses.color_pair(COLOR_PAIR_HEAD),
+                        )
+            except _curses.error as e:
+                msg: str = (
+                    f"[L:{curses.LINES},C:{curses.COLS}] [MY:{screen_max_y},MX:{screen_max_x}] Y:{active_trail.head_start()} X:{active_trail.column_number} "
+                )
+                raise ValueError(msg) from e
 
         # ---
 
