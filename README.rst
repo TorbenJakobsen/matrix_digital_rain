@@ -23,9 +23,9 @@ Here it is blue body and red head.
 .. image:: ./media/matrix_run_blue.png
 
 This project demonstrates use of the `curses <https://docs.python.org/3/howto/curses.html>`_ module.
-I was inpired by 
+I was inspired by 
 `Making the Matrix Screensaver in C on a PDP-11/83 <https://youtu.be/-foAV_zU2as?si=1GcCSSo1SPAo0Llh>`_
-and had long wanted to learn how to write an application using `curses <https://docs.python.org/3/howto/curses.html>`_.
+and had also long wanted to learn how to write an application utilizing `curses <https://docs.python.org/3/howto/curses.html>`_.
 
 ****************
   About Curses
@@ -49,6 +49,24 @@ Installing
 Executing
 =========
 
+While developing you can use the :code:`Makefile`
+
+.. code:: bash
+
+  make run
+
+or simply to run with default colors
+
+.. code:: bash
+
+  python3 matrix_rain.py
+
+or with whatever colors you might prefer
+
+.. code:: bash
+
+  python3 matrix_rain.py -c blue -H red
+
 ********
   Help
 ********
@@ -57,7 +75,7 @@ Executing
   TODO
 ********
 
-* Code breaks after resize when following writing to lower right corner.  
-* What to do with Windows
+* Code breaks after resize when later writing to lower right corner.  
+* What to do with Microsft Windows
 * Version due to type hints
 
