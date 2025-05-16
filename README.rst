@@ -43,6 +43,13 @@ and had also long wanted to learn how to write an application utilizing `curses 
 Dependencies
 ============
 
+The code needs Python 3.11 to run due to the type hints in te source code.
+I expect you can remove the type hint if you really want to run the code in an old installation.
+
+There is no dependencies to run outside the standard installation.
+
+You will need some dependencies to develop and test the application.
+
 Installing
 ==========
 
@@ -77,5 +84,4 @@ or with whatever colors you might prefer
 
 * Code breaks after resize when later writing to lower right corner.  
 * What to do with Microsft Windows
-* Version due to type hints
 

@@ -6,9 +6,15 @@ class MatrixSleepTimer:
 
     def __init__(
         self: Self,
-        sleep_sec: float = 0.1,
+        sleep_sec: float = 0.1,  # 100 msec
         change_factor: float = 1.6,
     ):
+
+        if not sleep_sec or float(sleep_sec) < 0:
+            raise ValueError("Sleep value must be 0 or positive")
+
+        if not change_factor or float(change_factor) <= 0:
+            raise ValueError("Change factor must be positive")
 
         self.sleep_sec = sleep_sec
         self.change_factor = change_factor
