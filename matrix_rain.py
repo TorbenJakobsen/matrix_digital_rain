@@ -50,6 +50,12 @@ class MatrixRainException(Exception):
 
 
 def at_lower_right_corner(line, col) -> bool:
+    """
+    `True` if position is at the lower right corner; otherwise `False`.
+
+    Writing to the lower right corner will raise an Exception
+    as the resulting move of cursor position will move out of bounds (next line).
+    """
     return (line, col) == (curses.LINES - 1, curses.COLS - 1)
 
 
