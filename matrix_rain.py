@@ -4,7 +4,7 @@ import random
 import time
 from collections.abc import Sequence
 from enum import Enum
-from typing import Optional
+from typing import Literal, NoReturn, Optional
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
@@ -75,6 +75,7 @@ def setup_screen(
     screen: curses.window,
     args: argparse.Namespace,
 ) -> None:
+    """Sets up curses screen (window) using arguments and defaults."""
 
     args_color: str = str(args.color)  # tail color
     args_background: str = str(args.background)
@@ -152,16 +153,43 @@ def pop_random_from_list(available: list[int]) -> int:
     """
     Chooses a random index, remove value from list and returns chosen value
 
-    e.g. [0,1,2,3,4] -> [0,1,2,4] and returns 3
+    e.g. `[0,1,2,3,4]` -> `[0,1,2,4]` and returns `3`
     """
     chosen: int = available.pop(random.randrange(len(available)))
     return chosen
+
+
+def validate_screen_size(
+    screen: curses.window,
+    screen_max_y: int,
+    screen_max_x: int,
+) -> tuple[Literal[True], int, int] | tuple[Literal[False], int, int]:
+    """Checks if screen is resized.
+
+    If resized returns True and new size;
+    otherwise returns False and old size.
+
+    Raises MatrixRainException if sizes are outside contraints.
+    """
+    if curses.is_term_resized(screen_max_y, screen_max_x):
+        screen_max_y, screen_max_x = screen.getmaxyx()
+        if screen_max_y < MIN_SCREEN_SIZE_Y:
+            raise MatrixRainException("Error: screen height is too short.")
+        if screen_max_x < MIN_SCREEN_SIZE_X:
+            raise MatrixRainException("Error: screen width is too narrow.")
+        return True, screen_max_y, screen_max_x
+    # Not resized
+    return False, screen_max_y, screen_max_x
 
 
 def main_loop(
     screen: curses.window,
     args: argparse.Namespace,
 ) -> None:
+    """Actual code is run here.
+
+    Call is initiated by the curses setup in `main()`.
+    """
 
     #
     # Read from parsed arguments
@@ -194,13 +222,13 @@ def main_loop(
         # Handle screen resize
         #
 
-        if curses.is_term_resized(screen_max_y, screen_max_x):
-            screen_max_y, screen_max_x = screen.getmaxyx()
-            if screen_max_y < MIN_SCREEN_SIZE_Y:
-                raise MatrixRainException("Error: screen height is too short.")
-            if screen_max_x < MIN_SCREEN_SIZE_X:
-                raise MatrixRainException("Error: screen width is too narrow.")
+        is_screen_resized, screen_max_y, screen_max_x = validate_screen_size(
+            screen,
+            screen_max_y,
+            screen_max_x,
+        )
 
+        if is_screen_resized:
             # Free up all the columns - no activated columns
             available_column_numbers = list(range(screen_max_x))
             active_trails_list.clear()
@@ -319,14 +347,14 @@ def main_loop(
 
 
 def validate_color(color: str) -> str:
-    lower_color = color.lower()
+    lower_color: str = color.lower()
     if lower_color in VALID_COLORS.keys():
         return lower_color
     raise argparse.ArgumentTypeError(f"'{color}' is not a valid color name")
 
 
 def argument_parsing(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser: argparse.ArgumentParser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
         "-C",
@@ -360,10 +388,11 @@ def argument_parsing(argv: Optional[Sequence[str]] = None) -> argparse.Namespace
 
 
 def main(argv: Optional[Sequence[str]] = None) -> None:
-    args = argument_parsing(argv)
+    args: argparse.Namespace = argument_parsing(argv)
 
     try:
         # Sets up curses including 8 default color pairs
+        # then runs main loop with curses
         curses.wrapper(main_loop, args)
     except KeyboardInterrupt:
         # Ignore ctrl-C
