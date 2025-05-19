@@ -83,4 +83,4 @@ or with whatever colors you might prefer
 ********
 
 * Make screen into an object
-* What to do with Microsft Windows
+* What to do with Microsoft Windows
