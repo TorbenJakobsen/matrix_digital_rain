@@ -1,5 +1,14 @@
 import curses
+from enum import Enum
 from typing import Self
+
+
+class Action(Enum):
+    NONE = 0
+    CONTINUE = 1
+    BREAK = 2
+    KEY_UP = 3
+    KEY_DOWN = 4
 
 
 class MatrixScreen:
@@ -43,3 +52,42 @@ class MatrixScreen:
             return True
         # Not resized
         return False
+
+    def handle_key_presses(self: Self) -> Action:
+
+        Q_CHAR_SET: set[int] = {ord("q"), ord("Q")}
+        F_CHAR_SET: set[int] = {ord("f"), ord("F")}
+
+        ch: int = self._screen.getch()
+        if ch == -1:
+            # no input
+            return Action.CONTINUE
+
+        if ch == curses.KEY_UP:
+            # Quit
+            return Action.KEY_UP
+
+        if ch == curses.KEY_DOWN:
+            # Quit
+            return Action.KEY_DOWN
+
+        if ch in Q_CHAR_SET:
+            # Quit
+            return Action.BREAK
+
+        if ch in F_CHAR_SET:
+            # Freeze
+            quit_loop = False
+            while True:
+                ch = self._screen.getch()
+                if ch in F_CHAR_SET:
+                    # Unfreeze
+                    break
+                elif ch in Q_CHAR_SET:
+                    # Quit
+                    quit_loop = True
+                    break
+            if quit_loop:
+                return Action.BREAK
+
+        return Action.NONE

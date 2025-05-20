@@ -2,14 +2,13 @@ import argparse
 import curses
 import random
 from collections.abc import Sequence
-from enum import Enum
-from typing import Literal, Optional
+from typing import Optional
 
 import _curses  # to be able to catch the proper exception
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
-from matrix_screen import MatrixScreen
+from matrix_screen import Action, MatrixScreen
 from matrix_sleep_timer import MatrixSleepTimer
 
 # Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
@@ -110,54 +109,6 @@ def setup_screen(
         VALID_COLORS[args_color],
         VALID_COLORS[args_background],
     )
-
-
-class Action(Enum):
-    NONE = 0
-    CONTINUE = 1
-    BREAK = 2
-    KEY_UP = 3
-    KEY_DOWN = 4
-
-
-def handle_key_presses(screen: curses.window) -> Action:
-
-    Q_CHAR_SET: set[int] = {ord("q"), ord("Q")}
-    F_CHAR_SET: set[int] = {ord("f"), ord("F")}
-
-    ch: int = screen.getch()
-    if ch == -1:
-        # no input
-        return Action.CONTINUE
-
-    if ch == curses.KEY_UP:
-        # Quit
-        return Action.KEY_UP
-
-    if ch == curses.KEY_DOWN:
-        # Quit
-        return Action.KEY_DOWN
-
-    if ch in Q_CHAR_SET:
-        # Quit
-        return Action.BREAK
-
-    if ch in F_CHAR_SET:
-        # Freeze
-        quit_loop = False
-        while True:
-            ch = screen.getch()
-            if ch in F_CHAR_SET:
-                # Unfreeze
-                break
-            elif ch in Q_CHAR_SET:
-                # Quit
-                quit_loop = True
-                break
-        if quit_loop:
-            return Action.BREAK
-
-    return Action.NONE
 
 
 def pop_random_from_list(available: list[int]) -> int:
@@ -314,7 +265,7 @@ def main_loop(
         # This logic needs to be at end of loop as it intentionally break out of loop
         #
 
-        action = handle_key_presses(screen)
+        action = mscreen.handle_key_presses()
         if action is Action.KEY_UP:
             sleep_timer.decrement_sleep()
             continue
