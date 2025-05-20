@@ -173,29 +173,6 @@ def pop_random_from_list(available: list[int]) -> int:
     return chosen
 
 
-def validate_screen_size(
-    screen: curses.window,
-    max_y: int,
-    max_x: int,
-) -> tuple[Literal[True], int, int] | tuple[Literal[False], int, int]:
-    """Checks if screen is resized.
-
-    If resized returns True and new size;
-    otherwise returns False and old size.
-
-    Raises MatrixRainException if sizes are outside contraints.
-    """
-    if curses.is_term_resized(max_y, max_x):
-        max_y, max_x = screen.getmaxyx()
-        if max_y < MIN_SCREEN_SIZE_Y:
-            raise MatrixRainException("Error: screen height is too short.")
-        if max_x < MIN_SCREEN_SIZE_X:
-            raise MatrixRainException("Error: screen width is too narrow.")
-        return True, max_y, max_x
-    # Not resized
-    return False, max_y, max_x
-
-
 def main_loop(
     screen: curses.window,
     args: argparse.Namespace,
@@ -236,18 +213,12 @@ def main_loop(
 
         screen_is_resized = mscreen.validate_screen_size()
 
-        # screen_is_resized, screen_max_y, screen_max_x = validate_screen_size(
-        #    screen,
-        #    screen_max_y,
-        #    screen_max_x,
-        # )
-
         if screen_is_resized:
             screen_max_y = mscreen.height
             screen_max_x = mscreen.width
 
             # Free up all the columns - no activated columns
-            available_column_numbers = list(range(screen_max_x))
+            available_column_numbers = list(range(mscreen.width))
             active_trails_list.clear()
 
             screen.clear()
