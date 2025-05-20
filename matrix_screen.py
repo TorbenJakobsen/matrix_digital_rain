@@ -11,6 +11,23 @@ class Action(Enum):
     KEY_DOWN = 4
 
 
+VALID_COLORS = {
+    "black": curses.COLOR_BLACK,
+    "red": curses.COLOR_RED,
+    "green": curses.COLOR_GREEN,
+    "yellow": curses.COLOR_YELLOW,
+    "blue": curses.COLOR_BLUE,
+    "magenta": curses.COLOR_MAGENTA,
+    "cyan": curses.COLOR_CYAN,
+    "white": curses.COLOR_WHITE,
+}
+"""
+Translates color names to `curses` constants.
+
+The colors are the default initial `curses` colors.
+"""
+
+
 class MatrixScreen:
     """
     Wraps a curses window object and exposes cnvenience mtthods.

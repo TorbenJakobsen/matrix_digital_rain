@@ -8,7 +8,7 @@ import _curses  # to be able to catch the proper exception
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
-from matrix_screen import Action, MatrixScreen
+from matrix_screen import VALID_COLORS, Action, MatrixScreen
 from matrix_sleep_timer import MatrixSleepTimer
 
 # Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
@@ -18,7 +18,7 @@ from matrix_sleep_timer import MatrixSleepTimer
 # https://docs.python.org/3/howto/curses.html
 
 
-# Initial ("invalid" as too small) values -> will force a size recalculation later
+# Global initial ("invalid" as too small) values -> will force a size recalculation later
 screen_max_x: int = 1  # columns
 screen_max_y: int = 1  # lines
 
@@ -28,25 +28,6 @@ COLOR_PAIR_TAIL: int = 9
 
 BLANK: str = " "
 
-VALID_COLORS = {
-    "black": curses.COLOR_BLACK,
-    "red": curses.COLOR_RED,
-    "green": curses.COLOR_GREEN,
-    "yellow": curses.COLOR_YELLOW,
-    "blue": curses.COLOR_BLUE,
-    "magenta": curses.COLOR_MAGENTA,
-    "cyan": curses.COLOR_CYAN,
-    "white": curses.COLOR_WHITE,
-}
-"""
-Translates color names to `curses` constants.
-
-The colors are the default initial `curses` colors.
-"""
-
-
-MIN_SCREEN_SIZE_Y = 8
-MIN_SCREEN_SIZE_X = 8
 
 sleep_timer: MatrixSleepTimer = MatrixSleepTimer(0.1, 1.6)
 """Determines sleep interval to regulate rain trail descent on screen."""
