@@ -9,6 +9,7 @@ import _curses  # to be able to catch the proper exception
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
+from matrix_screen import MatrixScreen
 from matrix_sleep_timer import MatrixSleepTimer
 
 # Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
@@ -206,6 +207,8 @@ def main_loop(
     global screen_max_y
     global screen_max_x
 
+    mscreen = MatrixScreen(screen)
+
     #
     # Read from parsed arguments
     #
@@ -231,13 +234,18 @@ def main_loop(
         # Handle screen resize
         #
 
-        screen_is_resized, screen_max_y, screen_max_x = validate_screen_size(
-            screen,
-            screen_max_y,
-            screen_max_x,
-        )
+        screen_is_resized = mscreen.validate_screen_size()
+
+        # screen_is_resized, screen_max_y, screen_max_x = validate_screen_size(
+        #    screen,
+        #    screen_max_y,
+        #    screen_max_x,
+        # )
 
         if screen_is_resized:
+            screen_max_y = mscreen.height
+            screen_max_x = mscreen.width
+
             # Free up all the columns - no activated columns
             available_column_numbers = list(range(screen_max_x))
             active_trails_list.clear()
