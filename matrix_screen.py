@@ -27,6 +27,11 @@ Translates color names to `curses` constants.
 The colors are the default initial `curses` colors.
 """
 
+COLOR_PAIR_HEAD: int = 10
+COLOR_PAIR_TAIL: int = 9
+
+BLANK: str = " "
+
 
 class MatrixScreen:
     """
@@ -108,3 +113,30 @@ class MatrixScreen:
                 return Action.BREAK
 
         return Action.NONE
+
+    def setup_screen(
+        self: Self,
+        head_color: str,
+        tail_color: str,
+        back_color: str,
+    ) -> None:
+        """Sets up curses screen (window) using arguments and defaults."""
+
+        #
+        # Set up curses and terminal window
+        #
+
+        INVISIBLE = 0
+        curses.curs_set(INVISIBLE)  # Set the cursor to invisible.
+        self._screen.timeout(0)  # No blocking for `screen.getch()`.
+
+        curses.init_pair(
+            COLOR_PAIR_HEAD,
+            VALID_COLORS[head_color],
+            VALID_COLORS[back_color],
+        )
+        curses.init_pair(
+            COLOR_PAIR_TAIL,
+            VALID_COLORS[tail_color],
+            VALID_COLORS[back_color],
+        )

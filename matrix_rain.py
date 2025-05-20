@@ -8,7 +8,14 @@ import _curses  # to be able to catch the proper exception
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
-from matrix_screen import VALID_COLORS, Action, MatrixScreen
+from matrix_screen import (
+    BLANK,
+    COLOR_PAIR_HEAD,
+    COLOR_PAIR_TAIL,
+    VALID_COLORS,
+    Action,
+    MatrixScreen,
+)
 from matrix_sleep_timer import MatrixSleepTimer
 
 # Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
@@ -21,12 +28,6 @@ from matrix_sleep_timer import MatrixSleepTimer
 # Global initial ("invalid" as too small) values -> will force a size recalculation later
 screen_max_x: int = 1  # columns
 screen_max_y: int = 1  # lines
-
-
-COLOR_PAIR_HEAD: int = 10
-COLOR_PAIR_TAIL: int = 9
-
-BLANK: str = " "
 
 
 sleep_timer: MatrixSleepTimer = MatrixSleepTimer(0.1, 1.6)
@@ -62,36 +63,6 @@ def tail_at_lower_right_corner(trail: MatrixRainTrail) -> bool:
     return at_lower_right_corner(trail.tail_start(), trail.column_number)
 
 
-def setup_screen(
-    screen: curses.window,
-    args: argparse.Namespace,
-) -> None:
-    """Sets up curses screen (window) using arguments and defaults."""
-
-    args_color: str = str(args.color)  # tail color
-    args_background: str = str(args.background)
-    args_head_color: str = str(args.head_color)
-
-    #
-    # Set up curses and terminal window
-    #
-
-    INVISIBLE = 0
-    curses.curs_set(INVISIBLE)  # Set the cursor to invisible.
-    screen.timeout(0)  # No blocking for `screen.getch()`.
-
-    curses.init_pair(
-        COLOR_PAIR_HEAD,
-        VALID_COLORS[args_head_color],
-        VALID_COLORS[args_background],
-    )
-    curses.init_pair(
-        COLOR_PAIR_TAIL,
-        VALID_COLORS[args_color],
-        VALID_COLORS[args_background],
-    )
-
-
 def pop_random_from_list(available: list[int]) -> int:
     """
     Chooses a random index, remove value from list and returns chosen value
@@ -117,12 +88,11 @@ def main_loop(
     global screen_max_x
 
     mscreen = MatrixScreen(screen)
-
-    #
     # Read from parsed arguments
-    #
-
-    setup_screen(screen, args)
+    args_color: str = str(args.color)  # tail color
+    args_background: str = str(args.background)
+    args_head_color: str = str(args.head_color)
+    mscreen.setup_screen(args_head_color, args_color, args_background)
 
     # ---
 
