@@ -2,6 +2,12 @@ import curses
 from enum import Enum
 from typing import Self
 
+# Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
+# Color pair 0 is hard-wired to white on black, and cannot be changed.
+# Coordinates are always passed in the order y,x, and the top-left corner of a window is coordinate (0,0)
+# Writing lower right corner...
+# https://docs.python.org/3/howto/curses.html
+
 
 class Action(Enum):
     NONE = 0
@@ -140,3 +146,9 @@ class MatrixScreen:
             VALID_COLORS[tail_color],
             VALID_COLORS[back_color],
         )
+
+    def refresh(self: Self) -> None:
+        self._screen.refresh()
+
+    def clear(self: Self) -> None:
+        self._screen.clear()

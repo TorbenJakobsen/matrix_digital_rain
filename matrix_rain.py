@@ -18,13 +18,6 @@ from matrix_screen import (
 )
 from matrix_sleep_timer import MatrixSleepTimer
 
-# Colors are numbered, and start_color() initializes 8 basic colors when it activates color mode.
-# Color pair 0 is hard-wired to white on black, and cannot be changed.
-# Coordinates are always passed in the order y,x, and the top-left corner of a window is coordinate (0,0)
-# Writing lower right corner...
-# https://docs.python.org/3/howto/curses.html
-
-
 # Global initial ("invalid" as too small) values -> will force a size recalculation later
 screen_max_x: int = 1  # columns
 screen_max_y: int = 1  # lines
@@ -82,7 +75,7 @@ def main_loop(
 ) -> None:
     """Actual code is run here.
 
-    Call is initiated by the curses setup in `main()`.
+    Call is initiated by the curses wrapper setup in `main()`.
     """
     global screen_max_y
     global screen_max_x
@@ -105,7 +98,7 @@ def main_loop(
     exhausted_trails_list: list[MatrixRainTrail] = []
 
     TO_ACTIVATE = 2
-    MIN_AVAILABLE_COLUMNS = 0  # Leave some columns without trails
+    MIN_AVAILABLE_COLUMNS = 0  # Leave columns possibly without trails?
 
     while True:
 
@@ -198,7 +191,7 @@ def main_loop(
 
         # ---
 
-        screen.refresh()
+        mscreen.refresh()
         sleep_timer.sleep()
 
         #
