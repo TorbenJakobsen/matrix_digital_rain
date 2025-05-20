@@ -19,11 +19,6 @@ from matrix_screen import (
 from matrix_sleep_timer import MatrixSleepTimer
 from random_list import RandomList
 
-# Global initial ("invalid" as too small) values -> will force a size recalculation later
-screen_max_x: int = 1  # columns
-screen_max_y: int = 1  # lines
-
-
 sleep_timer: MatrixSleepTimer = MatrixSleepTimer(0.1, 1.6)
 """Determines sleep interval to regulate rain trail descent on screen."""
 
@@ -32,29 +27,22 @@ class MatrixRainException(Exception):
     pass
 
 
-def at_lower_right_corner(line, col) -> bool:
-    """
-    `True` if position is at the bottom right corner of screen; otherwise `False`.
-    """
-    return (line, col) == (screen_max_y - 1, screen_max_x - 1)
-
-
-def head_at_lower_right_corner(trail: MatrixRainTrail) -> bool:
+def head_at_lower_right_corner(scr: MatrixScreen, trail: MatrixRainTrail) -> bool:
     """
     `True` if position is at the bottom right corner of screen; otherwise `False`.
 
     If `curses` add a char at bottom right corner the cursor will be moved outside the screen and raise an error.
     """
-    return at_lower_right_corner(trail.head_start(), trail.column_number)
+    return scr.at_lower_right_corner(trail.head_start(), trail.column_number)
 
 
-def tail_at_lower_right_corner(trail: MatrixRainTrail) -> bool:
+def tail_at_lower_right_corner(scr: MatrixScreen, trail: MatrixRainTrail) -> bool:
     """
     `True` if position is at the bottom right corner of screen; otherwise `False`.
 
     If `curses` add a char at bottom right corner the cursor will be moved outside the screen and raise an error.
     """
-    return at_lower_right_corner(trail.tail_start(), trail.column_number)
+    return scr.at_lower_right_corner(trail.tail_start(), trail.column_number)
 
 
 def main_loop(
@@ -65,8 +53,6 @@ def main_loop(
 
     Call is initiated by the curses wrapper setup in `main()`.
     """
-    global screen_max_y
-    global screen_max_x
 
     mscreen = MatrixScreen(screen)
     # Read from parsed arguments
@@ -97,8 +83,6 @@ def main_loop(
         screen_is_resized = mscreen.validate_screen_size()
 
         if screen_is_resized:
-            screen_max_y = mscreen.height
-            screen_max_x = mscreen.width
 
             # Free up all the columns - no activated columns
             available_column_numbers: RandomList = RandomList(mscreen.width)
@@ -124,8 +108,8 @@ def main_loop(
             active_trails_list.append(
                 MatrixRainTrail(
                     chosen_column_number,
-                    screen_max_x,
-                    screen_max_y,
+                    mscreen.width,
+                    mscreen.height,
                 )
             )
 
@@ -138,7 +122,7 @@ def main_loop(
             # Modify the head and the tail (ignore body between)
             try:
 
-                if not head_at_lower_right_corner(active_trail):
+                if not head_at_lower_right_corner(mscreen, active_trail):
                     if active_trail.is_head_visible():
                         mscreen.addstr(
                             active_trail.head_start(),
@@ -147,7 +131,7 @@ def main_loop(
                             curses.color_pair(COLOR_PAIR_TAIL),
                         )
 
-                if not tail_at_lower_right_corner(active_trail):
+                if not tail_at_lower_right_corner(mscreen, active_trail):
                     if active_trail.is_tail_visible():
                         mscreen.addstr(
                             active_trail.tail_start(),
@@ -164,7 +148,7 @@ def main_loop(
                     exhausted_trails_list.append(active_trail)
                     continue
 
-                if not head_at_lower_right_corner(active_trail):
+                if not head_at_lower_right_corner(mscreen, active_trail):
                     if active_trail.is_head_visible():
                         mscreen.addstr(
                             active_trail.head_start(),

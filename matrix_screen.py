@@ -41,7 +41,7 @@ BLANK: str = " "
 
 class MatrixScreen:
     """
-    Wraps a curses window object and exposes cnvenience mtthods.
+    Wraps a `curses` window object and exposes cnvenience mtthods.
     """
 
     MIN_SCREEN_HEIGHT = 8
@@ -69,7 +69,7 @@ class MatrixScreen:
         If resized returns `True` and update internal representation of dimensions;
         otherwise returns `False`.
 
-        Raises `ValueErrror` if sizes are outside contraints.
+        Raises `ValueErrror` if sizes are below contraints.
         """
         if curses.is_term_resized(self._height, self._width):
             self._height, self._width = self._screen.getmaxyx()
@@ -158,3 +158,9 @@ class MatrixScreen:
 
     def addstr(self: Self, y_coord: int, x_coord: int, s: str, attr: int) -> None:
         self._screen.addstr(y_coord, x_coord, s, attr)
+
+    def at_lower_right_corner(self: Self, line: int, col: int) -> bool:
+        """
+        `True` if position is at the bottom right corner of screen; otherwise `False`.
+        """
+        return (line, col) == (self._height - 1, self._width - 1)
