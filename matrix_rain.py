@@ -1,6 +1,5 @@
 import argparse
 import curses
-import random
 from collections.abc import Sequence
 from typing import Optional
 
