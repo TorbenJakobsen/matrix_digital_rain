@@ -137,9 +137,10 @@ def main_loop(
 
             # Modify the head and the tail (ignore body between)
             try:
+
                 if not head_at_lower_right_corner(active_trail):
                     if active_trail.is_head_visible():
-                        screen.addstr(
+                        mscreen.addstr(
                             active_trail.head_start(),
                             active_trail.column_number,
                             next(char_itr),
@@ -148,7 +149,7 @@ def main_loop(
 
                 if not tail_at_lower_right_corner(active_trail):
                     if active_trail.is_tail_visible():
-                        screen.addstr(
+                        mscreen.addstr(
                             active_trail.tail_start(),
                             active_trail.column_number,
                             BLANK,
@@ -165,15 +166,16 @@ def main_loop(
 
                 if not head_at_lower_right_corner(active_trail):
                     if active_trail.is_head_visible():
-                        screen.addstr(
+                        mscreen.addstr(
                             active_trail.head_start(),
                             active_trail.column_number,
                             next(char_itr),
                             curses.color_pair(COLOR_PAIR_HEAD),
                         )
+
             except _curses.error as e:
                 msg: str = (
-                    f"[L:{curses.LINES},C:{curses.COLS}] [MY:{screen_max_y},MX:{screen_max_x}] Y:{active_trail.head_start()} X:{active_trail.column_number} "
+                    f"[[H:{mscreen.height},W:{mscreen.width}] Y:{active_trail.head_start()} X:{active_trail.column_number} "
                 )
                 raise ValueError(msg) from e
 

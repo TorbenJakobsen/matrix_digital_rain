@@ -155,3 +155,6 @@ class MatrixScreen:
 
     def erase(self: Self) -> None:
         self._screen.erase()
+
+    def addstr(self: Self, y_coord: int, x_coord: int, s: str, attr: int) -> None:
+        self._screen.addstr(y_coord, x_coord, s, attr)
