@@ -17,6 +17,7 @@ from matrix_screen import (
     MatrixScreen,
 )
 from matrix_sleep_timer import MatrixSleepTimer
+from random_list import RandomList
 
 # Global initial ("invalid" as too small) values -> will force a size recalculation later
 screen_max_x: int = 1  # columns
@@ -56,19 +57,6 @@ def tail_at_lower_right_corner(trail: MatrixRainTrail) -> bool:
     return at_lower_right_corner(trail.tail_start(), trail.column_number)
 
 
-def pop_random_from_list(available: list[int]) -> int:
-    """
-    Chooses a random index, remove value from list and returns chosen value
-
-    e.g. `[0,1,2,3,4]` -> `[0,1,2,4]` and returns `3`
-    """
-    if not available or len(available) == 0:
-        raise ValueError("argument list has no elements to pop")
-
-    chosen: int = available.pop(random.randrange(len(available)))
-    return chosen
-
-
 def main_loop(
     screen: curses.window,
     args: argparse.Namespace,
@@ -93,7 +81,7 @@ def main_loop(
 
     active_trails_list: list[MatrixRainTrail] = []
 
-    available_column_numbers: list[int] = []
+    available_column_numbers: RandomList
 
     exhausted_trails_list: list[MatrixRainTrail] = []
 
@@ -113,11 +101,11 @@ def main_loop(
             screen_max_x = mscreen.width
 
             # Free up all the columns - no activated columns
-            available_column_numbers = list(range(mscreen.width))
+            available_column_numbers: RandomList = RandomList(mscreen.width)
             active_trails_list.clear()
 
-            screen.clear()
-            screen.refresh()
+            mscreen.clear()
+            mscreen.refresh()
             # -> continue loop from start
             continue
 
@@ -130,7 +118,7 @@ def main_loop(
             if len(available_column_numbers) <= MIN_AVAILABLE_COLUMNS:
                 break
 
-            chosen_column_number: int = pop_random_from_list(available_column_numbers)
+            chosen_column_number: int = available_column_numbers.pop_random()
 
             # activate trail by chosen number
             active_trails_list.append(
@@ -228,8 +216,8 @@ def main_loop(
     # Exited loop -> clean up
     #
 
-    screen.erase()
-    screen.refresh()
+    mscreen.erase()
+    mscreen.refresh()
 
 
 #

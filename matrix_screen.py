@@ -152,3 +152,6 @@ class MatrixScreen:
 
     def clear(self: Self) -> None:
         self._screen.clear()
+
+    def erase(self: Self) -> None:
+        self._screen.erase()
