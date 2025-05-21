@@ -3,7 +3,7 @@ import random
 
 class MatrixRainCharacters:
     """
-    An iterator of random characters.
+    An iterator of characters chosen randomly from an internal list.
 
     >>> char_itr = MatrixRainCharacters()
     >>> print(next(char_itr))
@@ -29,12 +29,14 @@ class MatrixRainCharacters:
     __CHARACTERS_AS_LIST = list(__CHARACTERS_AS_STR)
 
     def __iter__(self):
-        # initializes and returns the iterator object itself
+        """Initializes and returns the iterator object itself."""
         return self
 
     def __next__(self):
-        # retrieves the next available item,
-        # which is a random choice from the available characters
+        """
+        Retrieves the next available item,
+        which is a random choice from the available characters.
+        """
         return random.choice(MatrixRainCharacters.__CHARACTERS_AS_LIST)
 
 
