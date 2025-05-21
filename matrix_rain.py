@@ -53,7 +53,7 @@ def main_loop(
     Call is initiated by the curses wrapper setup in `main()`.
     """
 
-    mscreen = MatrixScreen(screen)
+    mscreen: MatrixScreen = MatrixScreen(screen)
     # Read from parsed arguments
     args_color: str = str(args.color)  # tail color
     args_background: str = str(args.background)
