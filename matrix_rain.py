@@ -79,17 +79,17 @@ def main_loop(
         # Handle screen resize
         #
 
-        screen_is_resized = mscreen.validate_screen_size()
+        screen_is_resized: bool = mscreen.validate_screen_size()
 
         if screen_is_resized:
 
             # Free up all the columns - no activated columns
-            available_column_numbers: RandomList = RandomList(mscreen.width)
+            available_column_numbers = RandomList(mscreen.width)
             active_trails_list.clear()
 
             mscreen.clear()
             mscreen.refresh()
-            # -> continue loop from start
+            # -> continue infinite loop from loop start
             continue
 
         #
@@ -121,6 +121,10 @@ def main_loop(
             # Modify the head and the tail (ignore body between)
             try:
 
+                #
+                # Head becomes tail ()
+                #
+
                 if not head_at_lower_right_corner(mscreen, active_trail):
                     if active_trail.is_head_visible():
                         mscreen.addstr(
@@ -129,6 +133,10 @@ def main_loop(
                             next(char_itr),
                             curses.color_pair(COLOR_PAIR_TAIL),
                         )
+
+                #
+                # Tail becomes 'blank'
+                #
 
                 if not tail_at_lower_right_corner(mscreen, active_trail):
                     if active_trail.is_tail_visible():
@@ -139,6 +147,10 @@ def main_loop(
                             curses.color_pair(COLOR_PAIR_TAIL),
                         )
 
+                #
+                # move forward
+                #
+
                 active_trail.move_forward()
 
                 if active_trail.is_exhausted():
@@ -146,6 +158,10 @@ def main_loop(
                     # Just removing from `active_trails_list` messes up loop
                     exhausted_trails_list.append(active_trail)
                     continue
+
+                #
+                # New head
+                #
 
                 if not head_at_lower_right_corner(mscreen, active_trail):
                     if active_trail.is_head_visible():

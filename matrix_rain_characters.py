@@ -2,6 +2,15 @@ import random
 
 
 class MatrixRainCharacters:
+    """
+    An iterator of random characters.
+
+    >>> char_itr = MatrixRainCharacters()
+    >>> print(next(char_itr))
+    y
+    >>> print(next(char_itr))
+    l
+    """
 
     __CHARACTERS_AS_STR: str = (
         # Western
