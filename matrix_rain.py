@@ -57,6 +57,80 @@ def setup_screen(
     return mscreen
 
 
+def process_trail(
+    mscreen: MatrixScreen,
+    matrix_rain_trails: MatrixRainTrails,
+    active_trail: MatrixRainTrail,
+) -> None:
+
+    char_itr: MatrixRainCharacters = MatrixRainCharacters()
+
+    #
+    # Head becomes tail ()
+    #
+
+    if not head_at_lower_right_corner(mscreen, active_trail):
+        if active_trail.is_head_visible():
+            mscreen.addstr(
+                active_trail.head_start(),
+                active_trail.column_number,
+                next(char_itr),
+                curses.color_pair(COLOR_PAIR_TAIL),
+            )
+
+    #
+    # Tail becomes 'blank'
+    #
+
+    if not tail_at_lower_right_corner(mscreen, active_trail):
+        if active_trail.is_tail_visible():
+            mscreen.addstr(
+                active_trail.tail_start(),
+                active_trail.column_number,
+                BLANK,
+                curses.color_pair(COLOR_PAIR_TAIL),
+            )
+
+    #
+    # move forward
+    #
+
+    active_trail.move_forward()
+
+    if active_trail.is_exhausted():
+        # Flag as exhausted for later processing when leaving loop
+        matrix_rain_trails.exhaust(active_trail)
+        return
+
+    #
+    # New head
+    #
+
+    if not head_at_lower_right_corner(mscreen, active_trail):
+        if active_trail.is_head_visible():
+            mscreen.addstr(
+                active_trail.head_start(),
+                active_trail.column_number,
+                next(char_itr),
+                curses.color_pair(COLOR_PAIR_HEAD),
+            )
+
+
+def process_trails(
+    mscreen: MatrixScreen,
+    matrix_rain_trails: MatrixRainTrails,
+) -> None:
+    for active_trail in matrix_rain_trails.active_trails:
+        try:
+            process_trail(mscreen, matrix_rain_trails, active_trail)
+        except _curses.error as e:
+            msg: str = (
+                f"[[H:{mscreen.height},W:{mscreen.width}] Y:{active_trail.head_start()} X:{active_trail.column_number} "
+            )
+            raise ValueError(msg) from e
+    matrix_rain_trails.replenish_exhausted()
+
+
 def main_loop(
     screen: curses.window,
     args: argparse.Namespace,
@@ -69,8 +143,6 @@ def main_loop(
     mscreen: MatrixScreen = setup_screen(screen, args)
 
     # ---
-
-    char_itr: MatrixRainCharacters = MatrixRainCharacters()
 
     matrix_rain_trails = MatrixRainTrails(mscreen.width, mscreen.height)
 
@@ -96,73 +168,12 @@ def main_loop(
 
         # ---
 
-        for active_trail in matrix_rain_trails.active_trails:
-
-            # Modify the head and the tail (ignore body between)
-            try:
-
-                #
-                # Head becomes tail ()
-                #
-
-                if not head_at_lower_right_corner(mscreen, active_trail):
-                    if active_trail.is_head_visible():
-                        mscreen.addstr(
-                            active_trail.head_start(),
-                            active_trail.column_number,
-                            next(char_itr),
-                            curses.color_pair(COLOR_PAIR_TAIL),
-                        )
-
-                #
-                # Tail becomes 'blank'
-                #
-
-                if not tail_at_lower_right_corner(mscreen, active_trail):
-                    if active_trail.is_tail_visible():
-                        mscreen.addstr(
-                            active_trail.tail_start(),
-                            active_trail.column_number,
-                            BLANK,
-                            curses.color_pair(COLOR_PAIR_TAIL),
-                        )
-
-                #
-                # move forward
-                #
-
-                active_trail.move_forward()
-
-                if active_trail.is_exhausted():
-                    # Flag as exhausted for later processing when leaving loop
-                    matrix_rain_trails.exhaust(active_trail)
-                    continue
-
-                #
-                # New head
-                #
-
-                if not head_at_lower_right_corner(mscreen, active_trail):
-                    if active_trail.is_head_visible():
-                        mscreen.addstr(
-                            active_trail.head_start(),
-                            active_trail.column_number,
-                            next(char_itr),
-                            curses.color_pair(COLOR_PAIR_HEAD),
-                        )
-
-            except _curses.error as e:
-                msg: str = (
-                    f"[[H:{mscreen.height},W:{mscreen.width}] Y:{active_trail.head_start()} X:{active_trail.column_number} "
-                )
-                raise ValueError(msg) from e
+        process_trails(mscreen, matrix_rain_trails)
 
         # ---
 
         mscreen.refresh()
         sleep_timer.sleep()
-
-        matrix_rain_trails.replenish_exhausted()
 
         #
         # Handle keypresses (if any) and terminates loop if needed.
