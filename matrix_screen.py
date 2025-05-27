@@ -28,9 +28,9 @@ VALID_COLORS = {
     "white": curses.COLOR_WHITE,
 }
 """
-Translates color names to `curses` constants.
+Translates color names to ``curses`` constants.
 
-The colors are the default initial `curses` colors.
+The colors are the default initial ``curses`` colors.
 """
 
 COLOR_PAIR_HEAD: int = 10
@@ -41,7 +41,7 @@ BLANK: str = " "
 
 class MatrixScreen:
     """
-    Wraps a `curses` window object and exposes cnvenience mtthods.
+    Wraps a ``curses`` window object and exposes convenience mtthods.
     """
 
     MIN_SCREEN_HEIGHT = 8
@@ -52,34 +52,48 @@ class MatrixScreen:
         screen: curses.window,
     ):
         self._screen = screen
-        self._width = MatrixScreen.MIN_SCREEN_WIDTH
-        self._height = MatrixScreen.MIN_SCREEN_HEIGHT
+        self._set_screen_size()
+
+    def __str__(self: Self) -> str:
+        """
+        When ``str()`` is called on an instance of ``MatrixScreen``.
+        """
+        return f"{self._height},{self._width}"
 
     @property
     def height(self: Self) -> int:
+        """The y-dimension of screen."""
         return self._height
 
     @property
     def width(self: Self) -> int:
+        """The x-dimension of screen."""
         return self._width
+
+    def _set_screen_size(self: Self) -> None:
+        """
+        Sets screen height (y) and width (x).
+
+        Raises ``ValueError`` if either value is below boundary value.
+        """
+        self._height, self._width = self._screen.getmaxyx()
+        if self._height < MatrixScreen.MIN_SCREEN_HEIGHT:
+            raise ValueError("screen height is too short.")
+        if self._width < MatrixScreen.MIN_SCREEN_WIDTH:
+            raise ValueError("screen width is too narrow.")
 
     def validate_screen_size(self: Self) -> bool:
         """Checks if screen is resized.
 
-        If resized returns `True` and update internal representation of dimensions;
+        If screen is resized then update internal representation of dimensions and returns `True`;
         otherwise returns `False`.
 
         Raises `ValueErrror` if sizes are below contraints.
         """
-        if curses.is_term_resized(self._height, self._width):
-            self._height, self._width = self._screen.getmaxyx()
-            if self._height < MatrixScreen.MIN_SCREEN_HEIGHT:
-                raise ValueError("Error: screen height is too short.")
-            if self._width < MatrixScreen.MIN_SCREEN_WIDTH:
-                raise ValueError("Error: screen width is too narrow.")
-            return True
-        # Not resized
-        return False
+        if not curses.is_term_resized(self._height, self._width):
+            return False
+        self._set_screen_size()
+        return True
 
     def handle_key_presses(self: Self) -> Action:
 

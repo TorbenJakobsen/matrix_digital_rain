@@ -66,7 +66,8 @@ def main_loop(
 
     active_trails_list: list[MatrixRainTrail] = []
 
-    available_column_numbers: RandomList
+    available_column_numbers = RandomList(mscreen.width)
+    active_trails_list.clear()
 
     exhausted_trails_list: list[MatrixRainTrail] = []
 
