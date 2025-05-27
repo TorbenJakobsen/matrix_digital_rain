@@ -5,6 +5,12 @@
   Matrix Digital Rain
 ######################
 
+.. raw:: html
+
+    <video>
+         <source src="./media/screen_running.mp4" type="video/mp4">
+    </video>
+
 ****************
   Introduction
 ****************
