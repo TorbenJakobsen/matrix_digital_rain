@@ -56,3 +56,9 @@ class MatrixRainTrails:
 
     def has_available_trails(self: Self, requested_size: int) -> bool:
         return len(self._available) >= requested_size
+
+    def activate_if_available(self: Self, to_activate: int, min_available):
+        for _ in range(to_activate):
+            if not self.has_available_trails(min_available):
+                break
+            self.activate_trail()

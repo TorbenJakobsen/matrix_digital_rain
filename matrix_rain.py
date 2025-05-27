@@ -17,7 +17,6 @@ from matrix_screen import (
     MatrixScreen,
 )
 from matrix_sleep_timer import MatrixSleepTimer
-from random_list import RandomList
 
 sleep_timer: MatrixSleepTimer = MatrixSleepTimer(0.1, 1.6)
 """Determines sleep interval to regulate rain trail descent on screen."""
@@ -93,14 +92,7 @@ def main_loop(
             # -> continue infinite loop from loop start
             continue
 
-        #
-        # If available columns are not all used -> create new trails
-        #
-
-        for _ in range(TO_ACTIVATE):
-            if not matrix_rain_trails.has_available_trails(MIN_AVAILABLE_COLUMNS):
-                break
-            matrix_rain_trails.activate_trail()
+        matrix_rain_trails.activate_if_available(TO_ACTIVATE, MIN_AVAILABLE_COLUMNS)
 
         # ---
 
