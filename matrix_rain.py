@@ -44,6 +44,19 @@ def tail_at_lower_right_corner(scr: MatrixScreen, trail: MatrixRainTrail) -> boo
     return scr.at_lower_right_corner(trail.tail_start(), trail.column_number)
 
 
+def setup_screen(
+    screen: curses.window,
+    args: argparse.Namespace,
+) -> MatrixScreen:
+    mscreen: MatrixScreen = MatrixScreen(screen)
+    # Read from parsed arguments
+    args_color: str = str(args.color)  # tail color
+    args_background: str = str(args.background)
+    args_head_color: str = str(args.head_color)
+    mscreen.setup_screen(args_head_color, args_color, args_background)
+    return mscreen
+
+
 def main_loop(
     screen: curses.window,
     args: argparse.Namespace,
@@ -53,12 +66,7 @@ def main_loop(
     Call is initiated by the curses wrapper setup in `main()`.
     """
 
-    mscreen: MatrixScreen = MatrixScreen(screen)
-    # Read from parsed arguments
-    args_color: str = str(args.color)  # tail color
-    args_background: str = str(args.background)
-    args_head_color: str = str(args.head_color)
-    mscreen.setup_screen(args_head_color, args_color, args_background)
+    mscreen: MatrixScreen = setup_screen(screen, args)
 
     # ---
 
