@@ -7,6 +7,7 @@ import _curses  # to be able to catch the proper exception
 
 from matrix_rain_characters import MatrixRainCharacters
 from matrix_rain_trail import MatrixRainTrail
+from matrix_rain_trails import MatrixRainTrails
 from matrix_screen import (
     BLANK,
     COLOR_PAIR_HEAD,
@@ -72,12 +73,7 @@ def main_loop(
 
     char_itr: MatrixRainCharacters = MatrixRainCharacters()
 
-    active_trails_list: list[MatrixRainTrail] = []
-
-    available_column_numbers = RandomList(mscreen.width)
-    active_trails_list.clear()
-
-    exhausted_trails_list: list[MatrixRainTrail] = []
+    matrix_rain_trails = MatrixRainTrails(mscreen.width, mscreen.height)
 
     TO_ACTIVATE = 2
     MIN_AVAILABLE_COLUMNS = 0  # Leave columns possibly without trails?
@@ -91,11 +87,7 @@ def main_loop(
         screen_is_resized: bool = mscreen.validate_screen_size()
 
         if screen_is_resized:
-
-            # Free up all the columns - no activated columns
-            available_column_numbers = RandomList(mscreen.width)
-            active_trails_list.clear()
-
+            matrix_rain_trails = MatrixRainTrails(mscreen.width, mscreen.height)
             mscreen.clear()
             mscreen.refresh()
             # -> continue infinite loop from loop start
@@ -106,26 +98,13 @@ def main_loop(
         #
 
         for _ in range(TO_ACTIVATE):
-            # Keep minimum available columns also after activation
-            if len(available_column_numbers) <= MIN_AVAILABLE_COLUMNS:
+            if not matrix_rain_trails.has_available_trails(MIN_AVAILABLE_COLUMNS):
                 break
-
-            chosen_column_number: int = available_column_numbers.pop_random()
-
-            # activate trail by chosen number
-            active_trails_list.append(
-                MatrixRainTrail(
-                    chosen_column_number,
-                    mscreen.width,
-                    mscreen.height,
-                )
-            )
+            matrix_rain_trails.activate_trail()
 
         # ---
 
-        exhausted_trails_list.clear()
-
-        for active_trail in active_trails_list:
+        for active_trail in matrix_rain_trails.active_trails:
 
             # Modify the head and the tail (ignore body between)
             try:
@@ -164,8 +143,7 @@ def main_loop(
 
                 if active_trail.is_exhausted():
                     # Flag as exhausted for later processing when leaving loop
-                    # Just removing from `active_trails_list` messes up loop
-                    exhausted_trails_list.append(active_trail)
+                    matrix_rain_trails.exhaust(active_trail)
                     continue
 
                 #
@@ -192,15 +170,7 @@ def main_loop(
         mscreen.refresh()
         sleep_timer.sleep()
 
-        #
-        # Remove exhausted from active trails and make column available
-        #
-
-        for exhausted_trail in exhausted_trails_list:
-            active_trails_list.pop(active_trails_list.index(exhausted_trail))
-            available_column_numbers.append(exhausted_trail.column_number)
-
-        exhausted_trails_list.clear()
+        matrix_rain_trails.replenish_exhausted()
 
         #
         # Handle keypresses (if any) and terminates loop if needed.
