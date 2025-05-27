@@ -6,11 +6,9 @@
 ######################
 
 .. raw:: html
-  <hr><hr>
-
-<video>
-  <source src="./media/screen_running.mp4" type="video/mp4">
-</video>
+  <video>
+    <source src="./media/screen_running.mp4" type="video/mp4">
+  </video>
 
 ****************
   Introduction
