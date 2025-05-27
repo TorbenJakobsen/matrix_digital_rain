@@ -123,11 +123,13 @@ def process_trails(
     for active_trail in matrix_rain_trails.active_trails:
         try:
             process_trail(mscreen, matrix_rain_trails, active_trail)
+            # Some trails can have been moved off screen and are marked as exhausted
         except _curses.error as e:
             msg: str = (
                 f"[[H:{mscreen.height},W:{mscreen.width}] Y:{active_trail.head_start()} X:{active_trail.column_number} "
             )
             raise ValueError(msg) from e
+    # If any trails were marked as exhausted by `process_trail` put them back as available
     matrix_rain_trails.replenish_exhausted()
 
 
@@ -156,7 +158,6 @@ def main_loop(
         #
 
         screen_is_resized: bool = mscreen.validate_screen_size()
-
         if screen_is_resized:
             matrix_rain_trails = MatrixRainTrails(mscreen.width, mscreen.height)
             mscreen.clear()
@@ -164,20 +165,28 @@ def main_loop(
             # -> continue infinite loop from loop start
             continue
 
+        #
+        # Activate trails if any are available; bare the minimum
+        #
+
         matrix_rain_trails.activate_if_available(TO_ACTIVATE, MIN_AVAILABLE_COLUMNS)
 
-        # ---
+        #
+        # Process trails
+        #
 
         process_trails(mscreen, matrix_rain_trails)
 
-        # ---
+        #
+        # Refresh screen and sleep for some time to make it humanly possible to see the screen output
+        #
 
         mscreen.refresh()
         sleep_timer.sleep()
 
         #
         # Handle keypresses (if any) and terminates loop if needed.
-        # This logic needs to be at end of loop as it intentionally break out of loop
+        # This logic needs to be at end of loop as it intentionally can break out of loop
         #
 
         action = mscreen.handle_key_presses()
