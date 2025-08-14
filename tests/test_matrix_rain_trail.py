@@ -1,6 +1,6 @@
 import pytest
 
-from ..matrix_rain_trail import MatrixRainTrail
+from matrix_rain_trail import MatrixRainTrail
 
 SCREEN_COLUMNS: int = 40
 SCREEN_LINES: int = 24
